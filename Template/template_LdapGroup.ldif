@@ -1,0 +1,4 @@
+dn: GROUP_DN_VALUE
+changetype: modify
+add: memberUid
+memberUid: MAIL_ID_VALUE

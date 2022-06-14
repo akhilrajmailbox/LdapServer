@@ -1,0 +1,13 @@
+dn: cn=config
+changetype: modify
+add: olcTLSCACertificateFile
+olcTLSCACertificateFile: ${SSL_CACERT}
+-
+add: olcTLSCertificateFile
+olcTLSCertificateFile: ${SSL_CERT}
+-
+add: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: ${SSL_KEY}
+
+# ldapmodify -H ldapi:/// -Y EXTERNAL -f ssl.ldif
+# https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-openldap-and-phpldapadmin-on-ubuntu-16-04

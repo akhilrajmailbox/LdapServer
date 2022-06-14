@@ -1,0 +1,6 @@
+dn: olcDatabase={-1}frontend,cn=config
+add: olcRequires
+olcRequires: authc
+
+# ldapmodify -H ldapi:/// -Y EXTERNAL -f disable_anon_frontend.ldif
+# https://serverfault.com/questions/325912/disallow-global-anonymous-bind-with-cn-config

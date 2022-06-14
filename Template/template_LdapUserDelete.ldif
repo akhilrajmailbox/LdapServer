@@ -1,0 +1,7 @@
+dn: USER_DN_VALUE
+changetype: delete
+
+dn: GROUP_DN_VALUE
+changetype: modify
+delete: memberUid
+memberUid: MAIL_ID_VALUE

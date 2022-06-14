@@ -1,0 +1,4 @@
+dn: cn=USER_CN_VALUE,BASE_DN_VALUE
+changetype: modify
+replace: uid
+uid: MAIL_ID_VALUE

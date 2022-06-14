@@ -1,0 +1,147 @@
+version: 1
+
+# Groups
+dn: ou=Groups,dc=my,dc=devops,dc=example,dc=com
+objectclass: organizationalUnit
+objectclass: top
+ou: Groups
+
+# Groups - devops-manager
+dn: cn=devops-manager,ou=Groups,dc=my,dc=devops,dc=example,dc=com
+cn: devops-manager
+gidnumber: 10000
+memberuid: akhilraj@example.com
+objectclass: posixGroup
+objectclass: top
+
+# Groups - my-developer
+dn: cn=my-developer,ou=Groups,dc=my,dc=devops,dc=example,dc=com
+cn: my-developer
+gidnumber: 10001
+memberuid: akhilraj@example.com
+objectclass: posixGroup
+objectclass: top
+
+# Groups - sonar-manager
+dn: cn=sonar-manager,ou=Groups,dc=my,dc=devops,dc=example,dc=com
+cn: sonar-manager
+gidnumber: 10002
+memberuid: akhilraj@example.com
+objectclass: posixGroup
+objectclass: top
+
+# Groups - my-contractor
+dn: cn=my-contractor,ou=Groups,dc=my,dc=devops,dc=example,dc=com
+cn: my-contractor
+gidnumber: 10003
+objectclass: posixGroup
+objectclass: top
+
+# Groups - devops-user
+dn: cn=devops-user,ou=Groups,dc=my,dc=devops,dc=example,dc=com
+cn: devops-user
+gidnumber: 10004
+memberuid: query.admin@example.com
+memberuid: job.builder@example.com
+memberuid: add.me@example.com
+objectclass: posixGroup
+objectclass: top
+
+# Groups - inactive-user
+dn: cn=inactive-user,ou=Groups,dc=my,dc=devops,dc=example,dc=com
+cn: inactive-user
+gidnumber: 10005
+objectclass: posixGroup
+objectclass: top
+
+
+
+# People
+dn: ou=People,dc=my,dc=devops,dc=example,dc=com
+objectclass: organizationalUnit
+objectclass: top
+ou: People
+
+# People - CNX
+dn: ou=CNX,ou=People,dc=my,dc=devops,dc=example,dc=com
+objectclass: organizationalUnit
+objectclass: top
+ou: CNX
+
+# People - CNX - Contractors
+dn: ou=Contractors,ou=People,dc=my,dc=devops,dc=example,dc=com
+objectclass: organizationalUnit
+objectclass: top
+ou: Contractors
+
+# People - CNX - DevOps
+dn: ou=DevOps,ou=People,dc=my,dc=devops,dc=example,dc=com
+objectclass: organizationalUnit
+objectclass: top
+ou: DevOps
+
+
+
+# People - CNX - Akhil Raj
+dn: cn=Akhil Raj,ou=CNX,ou=People,dc=my,dc=devops,dc=example,dc=com
+cn: Akhil Raj
+gidnumber: 10001
+givenname: Akhil
+homedirectory: /home/users/akhilraj
+loginshell: /bin/zsh
+mail: akhilraj@example.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Raj
+uid: akhilraj@example.com
+uidnumber: 30001
+userpassword: {SSHA}x
+
+# People - CNX - Add Me
+dn: cn=Add Me,ou=DevOps,ou=People,dc=my,dc=devops,dc=example,dc=com
+cn: Add Me
+gidnumber: 10004
+givenname: Add
+homedirectory: /home/users/addme
+loginshell: /bin/zsh
+mail: add.me@example.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Me
+uid: add.me@example.com
+uidnumber: 20001
+userpassword: {SSHA}x
+
+# People - DevOps - Job Builder
+dn: cn=Job Builder,ou=DevOps,ou=People,dc=my,dc=devops,dc=example,dc=com
+cn: Job Builder
+gidnumber: 10004
+givenname: Job
+homedirectory: /home/users/jobbuilder
+loginshell: /bin/zsh
+mail: job.builder@example.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Builder
+uid: job.builder@example.com
+uidnumber: 20002
+userpassword: {SSHA}x
+
+# People - DevOps - Query Admin
+dn: cn=Query Admin,ou=DevOps,ou=People,dc=my,dc=devops,dc=example,dc=com
+cn: Query Admin
+gidnumber: 10004
+givenname: Query
+homedirectory: /home/users/queryadmin
+loginshell: /bin/zsh
+mail: query.admin@example.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: Admin
+uid: query.admin@example.com
+uidnumber: 20003
+userpassword: {SSHA}x

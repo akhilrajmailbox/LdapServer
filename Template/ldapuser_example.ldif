@@ -1,0 +1,14 @@
+dn: cn=Jenkins User,ou=people,dc=cce,dc=devops,dc=com
+cn: Jenkins User
+gidnumber: 10001
+givenname: Jenkins
+homedirectory: /home/users/jenkins.user
+loginshell: /bin/zsh
+mail: jenkins.user@concentrix.com
+objectclass: inetOrgPerson
+objectclass: posixAccount
+objectclass: top
+sn: User
+uid: jenkins.user@concentrix.com
+uidnumber: 20002
+userpassword: e01ENX1GAsU1AvUHZ1MaD3ZiQlEsdgfdsg2OXk5aVk2DGFSlJnPT0=
