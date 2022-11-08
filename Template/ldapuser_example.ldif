@@ -1,14 +1,14 @@
-dn: cn=Jenkins User,ou=people,dc=cce,dc=devops,dc=com
+dn: cn=Jenkins User,ou=people,dc=devops,dc=com
 cn: Jenkins User
 gidnumber: 10001
 givenname: Jenkins
 homedirectory: /home/users/jenkins.user
 loginshell: /bin/zsh
-mail: jenkins.user@concentrix.com
+mail: jenkins.user@example.com
 objectclass: inetOrgPerson
 objectclass: posixAccount
 objectclass: top
 sn: User
-uid: jenkins.user@concentrix.com
+uid: jenkins.user@example.com
 uidnumber: 20002
-userpassword: e01ENX1GAsU1AvUHZ1MaD3ZiQlEsdgfdsg2OXk5aVk2DGFSlJnPT0=
+userpassword: sdsg@#RFDSV%&Y^BDFSBADS=

@@ -1,31 +1,31 @@
-FROM ubuntu:14.04
+FROM ubuntu:22.04
+MAINTAINER Akhil Raj
+
 RUN export DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 RUN echo 'slapd/root_password password password' | debconf-set-selections \
 	&& echo 'slapd/root_password_again password password' | debconf-set-selections \
-	&& DEBIAN_FRONTEND=noninteractive apt-get install -y slapd ldap-utils phpldapadmin apache2-utils
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y slapd ldap-utils apache2 php \
+		php-cgi libapache2-mod-php php-mbstring php-common php-pear ldap-account-manager
 	#gettext-base
 
-RUN sed -i "s|password_hash|password_hash_custom|g" /usr/share/phpldapadmin/lib/TemplateRender.php \
-	&& sed -i "s|<value id=\"/bin/tsh\">/bin/tsh</value>|<value id=\"/bin/bash\">/bin/bash</value>|g" /etc/phpldapadmin/templates/creation/posixAccount.xml \
-	&& sed -i "s|<value id=\"/bin/csh\">/bin/csh</value>|<value id=\"/bin/zsh\">/bin/zsh</value>|g" /etc/phpldapadmin/templates/creation/posixAccount.xml \
-	&& sed -i "s|^\$servers->setValue('server','name','My LDAP Server');|//\$servers->setValue('server','name','My LDAP Server');|g" /etc/phpldapadmin/config.php \
-	&& sed -i "s|^\$servers->setValue('server','base',array('dc=example,dc=com'));|//\$servers->setValue('server','base',array('dc=example,dc=com'));|g" /etc/phpldapadmin/config.php \
-	&& sed -i "s|^\$servers->setValue('login','bind_id','cn=admin,dc=example,dc=com');|//\$servers->setValue('login','bind_id','cn=admin,dc=example,dc=com');|g" /etc/phpldapadmin/config.php \
-	&& sed -i "/^?>/i \$servers->setValue('login','anon_bind',false);" /etc/phpldapadmin/config.php \
-	&& sed -i "/^?>/i \$config->custom->appearance['hide_template_warning'] = true;" /etc/phpldapadmin/config.php \
-	# custom configuration will update later
-	&& sed -i "/^?>/i //\$servers->setValue('server','name','LDAP_SERVER_NAME');" /etc/phpldapadmin/config.php \
-	&& sed -i "/^?>/i //\$servers->setValue('server','base',array('DC_NAME'));" /etc/phpldapadmin/config.php \
-	&& sed -i "/^?>/i //\$servers->setValue('login','bind_id','cn=DISPLAY_NAME,DC_NAME');" /etc/phpldapadmin/config.php
+RUN a2enconf php8.1-cgi
+RUN sed -i "s|Require all denied|Require all granted|g" /etc/apache2/conf-enabled/ldap-account-manager.conf
+	# # && sed -i "s|^posixAccount_loginShell: /bin/bash|posixAccount_loginShell: /bin/zsh|g" /var/lib/ldap-account-manager/config/templates/profiles/default.user \
+	# && sed -i "s|^modules: posixAccount_shells.*|modules: posixAccount_shells: /bin/bash+::+/bin/zsh+::+/bin/dash+::+/bin/false+::+/bin/ksh+::+/bin/sh|g" /var/lib/ldap-account-manager/config/samba3.sample.conf \
+	# && sed -i "s|^modules: posixAccount_shells.*|modules: posixAccount_shells: /bin/bash+::+/bin/zsh+::+/bin/dash+::+/bin/false+::+/bin/ksh+::+/bin/sh|g" /var/lib/ldap-account-manager/config/windows_samba4.sample.conf \
+	# && sed -i "s|/bin/csh|/bin/zsh|g" /usr/share/ldap-account-manager/lib/modules/posixAccount.inc
 
 WORKDIR /backup
 COPY sources sources
 RUN cp -r /etc/apache2 /backup/apache2 \
-	&& cp -r /etc/phpldapadmin /backup/phpldapadmin
+	&& cp -r /var/lib/ldap-account-manager /backup/lib-ldap-account-manager \
+	&& cp -r /etc/ldap-account-manager /backup/etc-ldap-account-manager
 
 WORKDIR /
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod a+x /entrypoint.sh
+COPY entrypoint.sh /
+COPY envFromFile.sh /
+RUN chmod a+x /envFromFile.sh /entrypoint.sh
+
 EXPOSE 389 636 80 443
 ENTRYPOINT "/entrypoint.sh"
