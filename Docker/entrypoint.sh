@@ -1,19 +1,28 @@
 #!/bin/bash
 
+source /envFromFile.sh LDAP_ADMIN_PASS
+source /envFromFile.sh HTPASSWORD
+
 function checkVariables() {
   if [[ ${SLAPD_CONF} == "fresh-install" ]] ; then
     echo "configuring slapd for first run"
     echo ""
-    [ -z "${LDAP_ADMIN_PASS}" ] && echo "Variable Error : LDAP_ADMIN_PASS --> Admin password for admin"
-    [ -z "${LDAP_DOMAIN}" ] && echo "Variable Error : LDAP_DOMAIN --> Domain name for LDAP"
-    [ -z "${LDAP_ORGANISATION}" ] && echo "Variable Error : LDAP_ORGANISATION --> Organisation name for LDAP domain"
-    [ -z "${HTPASSWORD}" ] && echo "Variable Error : HTPASSWORD --> admin Password for accessing the PhpLdapAdmin UI"
-    [ -z "${ALIAS}" ] && echo "Variable Error : ALIAS --> Alias for UI request"
-    [[ "${SSL_CONFIG}" != [Y,y,N,n] ]] && echo "Variable Error : SSL_CONFIG --> SSL termination"
+    if [[ "${LDAP_ADMIN_PASS}" == "" ]] && [[ "${LDAP_ADMIN_PASS_FILE}" == "" ]] ; then
+      echo "Variable Error : LDAP_ADMIN_PASS --> Admin password for admin"
+      exit 1
+    fi
+    if [[ "${HTPASSWORD}" == "" ]] && [[ "${HTPASSWORD_FILE}" == "" ]] ; then
+      echo "Variable Error : HTPASSWORD --> admin Password for accessing the LAM UI"
+      exit 1
+    fi
+    [ -z "${LDAP_DOMAIN}" ] && echo "Variable Error : LDAP_DOMAIN --> Domain name for LDAP" && exit 1
+    [ -z "${LDAP_ORGANISATION}" ] && echo "Variable Error : LDAP_ORGANISATION --> Organisation name for LDAP domain" && exit 1
+    # [ -z "${ALIAS}" ] && echo "Variable Error : ALIAS --> Alias for UI request" && exit 1
+    [[ "${SSL_CONFIG}" != [Y,y,N,n] ]] && echo "Variable Error : SSL_CONFIG --> SSL termination" && exit 1
     if [[ "${SSL_CONFIG}" == [Y,y] ]] ; then
-      [ -z "${SSL_CERT}" ] && echo "Variable Error : SSL_CERT --> If SSL_CONFIG enabled, cert path"
-      [ -z "${SSL_KEY}" ] && echo "Variable Error : SSL_KEY --> If SSL_CONFIG enabled, key path"
-      [ -z "${SSL_CACERT}" ] && echo "Variable Error : SSL_CACERT --> If SSL_CONFIG enabled, cacert path"
+      [ -z "${SSL_CERT}" ] && echo "Variable Error : SSL_CERT --> If SSL_CONFIG enabled, cert path" && exit 1
+      [ -z "${SSL_KEY}" ] && echo "Variable Error : SSL_KEY --> If SSL_CONFIG enabled, key path" && exit 1
+      [ -z "${SSL_CACERT}" ] && echo "Variable Error : SSL_CACERT --> If SSL_CONFIG enabled, cacert path" && exit 1
     fi
   else
     echo "slapd configured already, won't execute function : checkVariables()"
@@ -23,7 +32,7 @@ function checkVariables() {
 function setEnv() {
   export HOST_IP=`hostname -I | awk '{print $1}'`
   export DC_NAME=`echo ${LDAP_DOMAIN} | sed "s|\.|,dc=|g" | awk '{print "dc="$0}'`
-  if [ -e /var/lib/ldap/DB_CONFIG ] ; then
+  if [ -e /var/lib/ldap/data.mdb ] ; then
     export SLAPD_CONF="configured"
   else
     export SLAPD_CONF="fresh-install"
@@ -31,14 +40,20 @@ function setEnv() {
 }
 
 function freshConf() {
-  if [ ! "$(ls -A /etc/apache2/)" ] ; then
-    cp -r /backup/apache2/. /etc/apache2
+  if [[ ${SLAPD_CONF} == "fresh-install" ]] ; then
+    if [ ! "$(ls -A /etc/apache2/)" ] ; then
+      cp -r /backup/apache2/. /etc/apache2
+    fi
+    if [ ! "$(ls -A /var/lib/ldap-account-manager)" ] ; then
+      cp -r /backup/lib-ldap-account-manager/. /var/lib/ldap-account-manager
+    fi
+    if [ ! "$(ls -A /etc/ldap-account-manager)" ] ; then
+      cp -r /backup/etc-ldap-account-manager/. /etc/ldap-account-manager
+    fi
+    chown -R www-data:www-data /etc/apache2 /etc/ldap-account-manager /var/lib/ldap-account-manager
+  else
+    echo "slapd configured already, won't execute function : freshConf()"
   fi
-  if [ ! "$(ls -A /etc/phpldapadmin)" ] ; then
-    cp -r /backup/phpldapadmin/. /etc/phpldapadmin
-  fi
-  chown -R :www-data /etc/phpldapadmin
-  chown -R :www-data /etc/apache2
 }
 
 function bootStrap() {
@@ -60,19 +75,10 @@ slapd slapd/dump_database select when needed
 EOF
     dpkg-reconfigure -f noninteractive slapd
 
-    ## Configure phpLDAPadmin
+    ## Configure LAM
     if [[ ! -f /etc/apache2/htpasswd ]] && [[ ${HTPASSWORD} != "" ]] ; then
       htpasswd -b -c /etc/apache2/htpasswd admin ${HTPASSWORD}
     fi
-
-    sed -i "s|^//\$servers->setValue('server','name','LDAP_SERVER_NAME');|\$servers->setValue('server','name','${LDAP_SERVER_NAME}');|g" /etc/phpldapadmin/config.php
-    sed -i "s|^//\$servers->setValue('server','base',array('DC_NAME'));|\$servers->setValue('server','base',array('${DC_NAME}'));|g" /etc/phpldapadmin/config.php
-    sed -i "s|^//\$servers->setValue('login','bind_id','cn=DISPLAY_NAME,DC_NAME');|//\$servers->setValue('login','bind_id','cn=DISPLAY_NAME,${DC_NAME}');|g" /etc/phpldapadmin/config.php
-
-    if [ ! -e /etc/phpldapadmin/apache.conf-org ]; then
-      cp -r /etc/phpldapadmin/apache.conf /etc/phpldapadmin/apache.conf-org
-    fi
-    sed -i "s|Alias /phpldapadmin /usr/share/phpldapadmin/htdocs|Alias /${ALIAS} /usr/share/phpldapadmin/htdocs|g" /etc/phpldapadmin/apache.conf
 
     if [[ ${SSL_CONFIG} == "y" || ${SSL_CONFIG} == "Y" ]] ; then
       echo ""
